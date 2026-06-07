@@ -3,9 +3,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Errant — Daily Side Quests</title>
+    <meta name="description" content="A daily quest game for real life. One bold real-world quest a day — get off your phone and into the moment.">
+    <meta property="og:title" content="Errant — Daily Side Quests">
+    <meta property="og:description" content="One bold real-world quest a day. Get off your phone and into the moment.">
+    <meta property="og:type" content="website">
+    <style>
+        :root {
+            --bg:#f7e8ce; --bg2:#e3cea8;
+            --accent-start:#965b01; --accent-end:#c97a01;
+            --dark:#231403; --brown:#715129; --muted:#b49469; --card-border:#ddceac;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        html, body { height: 100%; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            color: var(--dark);
+            background: linear-gradient(180deg, var(--bg) 0%, var(--bg2) 100%);
+            background-attachment: fixed;
+            -webkit-font-smoothing: antialiased;
+            min-height: 100%; display: flex; flex-direction: column;
+        }
+        main {
+            flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 52px 24px 40px;
+        }
+        .wordmark {
+            font-family: Georgia, "Times New Roman", serif;
+            font-size: clamp(48px, 13vw, 76px); font-weight: 700; letter-spacing: .005em;
+            line-height: 1; margin-bottom: 30px;
+            background: linear-gradient(180deg, #DB9430 0%, #C97A01 46%, #8A5401 100%);
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 6px 22px rgba(201,122,1,.30));
+        }
+
+        /* ---------- the real card (matches in-app cardBack) ---------- */
+        .stage { position: relative; margin-bottom: 42px; display: flex; justify-content: center; }
+        .stage::before { /* radial amber glow behind card, like the app */
+            content: ""; position: absolute; width: 460px; height: 460px; left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            background: radial-gradient(circle, rgba(201,122,1,.18), rgba(150,91,1,.05) 45%, transparent 68%);
+            animation: glow 2.6s ease-in-out infinite;
+        }
+        .card {
+            position: relative; z-index: 1;
+            width: clamp(300px, 88vw, 376px);
+            aspect-ratio: 344 / 260;
+            border-radius: 18px; overflow: hidden;
+            background: linear-gradient(135deg, var(--accent-start) 0%, var(--accent-end) 50%, var(--accent-start) 100%);
+            border: 1.5px solid rgba(150,91,1,.5);
+            box-shadow: 0 22px 44px rgba(150,91,1,.28);
+            display: flex; flex-direction: column; align-items: center; justify-content: space-between;
+            padding: 26px 0;
+            animation: bob 2.6s ease-in-out infinite;
+        }
+        .card::after { /* inset white deco border */
+            content: ""; position: absolute; inset: 10px; border-radius: 12px;
+            border: 1px solid rgba(255,255,255,.22); pointer-events: none;
+        }
+        .rings { position: absolute; inset: 0; display: grid; place-items: center; pointer-events: none; }
+        .rings span { position: absolute; border: 1px solid rgba(255,255,255,.10); border-radius: 50%; }
+        .rings span:nth-child(1){ width: 90px;  height: 90px; }
+        .rings span:nth-child(2){ width: 146px; height: 146px; }
+        .rings span:nth-child(3){ width: 202px; height: 202px; }
+        .sheen {
+            position: absolute; top: -40%; left: 0; width: 46%; height: 180%;
+            background: linear-gradient(to right,
+                transparent 30%,
+                rgba(255,255,255,.30) 42%, rgba(255,255,255,.30) 47%,
+                transparent 55%,
+                rgba(255,255,255,.13) 66%, rgba(255,255,255,.13) 69%,
+                transparent 78%);
+            transform: translateX(-140%) rotate(20deg);
+            pointer-events: none; mix-blend-mode: screen; z-index: 1;
+            animation: sheen 2.7s ease-in-out infinite;
+        }
+        @keyframes sheen {
+            0%   { transform: translateX(-140%) rotate(20deg); }
+            58%  { transform: translateX(340%) rotate(20deg); }
+            100% { transform: translateX(340%) rotate(20deg); }
+        }
+        .motif {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 78px; height: 78px; border-radius: 50%;
+            background: rgba(255,255,255,.16); border: 1.5px solid rgba(255,255,255,.45);
+            display: grid; place-items: center; z-index: 2;
+        }
+        .motif svg { width: 38px; height: 38px; fill: #fff; filter: drop-shadow(0 2px 5px rgba(150,91,1,.5)); }
+        .card-top {
+            font-size: 15px; font-weight: 800; letter-spacing: .32em;
+            color: rgba(255,255,255,.85); z-index: 2; padding-left: .32em;
+        }
+        .card-bottom { z-index: 2; }
+        .card-bottom .reveal { font-size: 11px; font-weight: 800; letter-spacing: .26em; color: rgba(255,255,255,.95); }
+        .card-bottom .awaits { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.7); margin-top: 4px; }
+
+        @keyframes bob { 0%,100% { transform: translateY(7px); } 50% { transform: translateY(-9px); } }
+        @keyframes glow { 0%,100% { transform: translate(-50%,-50%) scale(.96); } 50% { transform: translate(-50%,-50%) scale(1.06); } }
+        @media (prefers-reduced-motion: reduce) { .card, .stage::before, .sheen { animation: none; } }
+
+        /* ---------- copy ---------- */
+        h1 {
+            font-size: clamp(30px, 7vw, 44px); font-weight: 800; line-height: 1.08;
+            letter-spacing: -.02em; max-width: 13ch; margin-bottom: 14px; color: var(--dark);
+        }
+        h1 .g {
+            background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
+            -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .sub { font-size: clamp(16px, 4.2vw, 18px); color: var(--brown); max-width: 32ch; line-height: 1.5; margin-bottom: 30px; }
+
+        /* ---------- app store button (official black badge style) ---------- */
+        .appstore {
+            display: inline-flex; align-items: center; gap: 11px;
+            background: #000; color: #fff; text-decoration: none;
+            padding: 12px 22px; border-radius: 14px;
+            transition: transform .15s ease, box-shadow .15s ease;
+            box-shadow: 0 12px 26px rgba(35,20,3,.22);
+        }
+        .appstore:hover { transform: translateY(-2px); box-shadow: 0 16px 34px rgba(35,20,3,.3); }
+        .appstore svg { width: 26px; height: 26px; fill: #fff; }
+        .appstore .t { text-align: left; line-height: 1.1; }
+        .appstore .t small { display: block; font-size: 10px; opacity: .9; }
+        .appstore .t b { font-size: 19px; font-weight: 600; }
+
+        .features { margin-top: 26px; font-size: 13.5px; color: var(--muted); }
+
+        footer {
+            text-align: center; padding: 26px 24px 34px;
+            border-top: 1px solid rgba(150,91,1,.14); color: var(--brown); font-size: 13px;
+        }
+        footer a { color: var(--accent-end); text-decoration: none; margin: 0 8px; }
+        footer a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-    <h1>Welcome to Errant</h1>
+    <main>
+        <div class="wordmark">Errant</div>
+
+        <div class="stage">
+            <div class="card">
+                <div class="rings"><span></span><span></span><span></span></div>
+                <div class="sheen"></div>
+                <div class="motif">
+                    <svg viewBox="0 0 48 48" aria-hidden="true">
+                        <path d="M24 9c1 9 5 13 14 14-9 1-13 5-14 14-1-9-5-13-14-14 9-1 13-5 14-14z"/>
+                        <path d="M39 5c.5 3.8 1.7 5 5.5 5.5-3.8.5-5 1.7-5.5 5.5-.5-3.8-1.7-5-5.5-5.5 3.8-.5 5-1.7 5.5-5.5z"/>
+                        <path d="M11 31c.4 3.2 1.4 4.2 4.6 4.6-3.2.4-4.2 1.4-4.6 4.6-.4-3.2-1.4-4.2-4.6-4.6 3.2-.4 4.2-1.4 4.6-4.6z"/>
+                    </svg>
+                </div>
+                <div class="card-top">ERRANT</div>
+                <div class="card-bottom">
+                    <div class="reveal">TAP TO REVEAL</div>
+                    <div class="awaits">Your first quest awaits</div>
+                </div>
+            </div>
+        </div>
+
+        <h1>Turn everyday life into an <span class="g">adventure</span>.</h1>
+        <p class="sub">One bold real-world quest a day. Get off your phone and into the moment.</p>
+
+        <!-- TODO: replace YOUR_APP_ID with your numeric Apple ID
+             (App Store Connect → App Information → "Apple ID"). -->
+        <a class="appstore" href="https://apps.apple.com/app/idYOUR_APP_ID">
+            <svg viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
+            <span class="t"><small>Download on the</small><b>App Store</b></span>
+        </a>
+
+        <div class="features">Daily quests &nbsp;·&nbsp; Streaks &amp; XP &nbsp;·&nbsp; A private friends feed</div>
+    </main>
+
+    <footer>
+        <a href="mailto:hello@errantapp.com">Contact us</a>
+        &nbsp;·&nbsp; <a href="/support">Support</a>
+        &nbsp;·&nbsp; <a href="/terms">Terms</a>
+        &nbsp;·&nbsp; <a href="/privacy">Privacy</a>
+    </footer>
 </body>
 </html>
