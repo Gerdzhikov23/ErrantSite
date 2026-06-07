@@ -48,7 +48,7 @@
         /* flip container bobs; inner rotates to flip */
         .flip {
             position: relative; z-index: 1;
-            width: clamp(300px, 88vw, 376px); aspect-ratio: 344 / 260;
+            width: min(376px, calc(100vw - 48px)); aspect-ratio: 344 / 260;
             perspective: 1000px; cursor: pointer;
             user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
             animation: bob 4.2s ease-in-out infinite;
