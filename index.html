@@ -48,13 +48,14 @@
         /* flip container bobs; inner rotates to flip */
         .flip {
             position: relative; z-index: 1;
-            width: min(376px, calc(100vw - 48px)); aspect-ratio: 344 / 260;
+            width: min(376px, calc(100vw - 48px)); height: 248px;
+            transition: height .9s cubic-bezier(.2,.85,.28,1.04);
             perspective: 1000px; cursor: pointer;
             user-select: none; -webkit-user-select: none; -webkit-touch-callout: none;
             animation: bob 4.2s ease-in-out infinite;
         }
         /* on flip: smooth flip + gentle pop, stop the bob, drop the pointer */
-        .flip.flipped { animation: flipPop .9s ease-out; cursor: default; }
+        .flip.flipped { animation: flipPop .9s ease-out; cursor: default; height: 216px; }
         @keyframes flipPop {
             0%   { transform: scale(1); }
             42%  { transform: scale(1.08); }
@@ -162,19 +163,22 @@
         .card.front {
             transform: rotateY(180deg);
             background: #fff; border: 1.5px solid rgba(201,122,1,.45);
-            display: flex; flex-direction: column; gap: 9px; padding: 20px; text-align: left;
+            display: flex; padding: 20px; text-align: left;
         }
+        .q-content { flex: 1; display: flex; flex-direction: column; gap: 12px; transition: opacity .3s ease; }
+        .q-content.fade { opacity: 0; }
         .q-row { display: flex; justify-content: space-between; align-items: center; }
-        .q-cat { font-size: 12px; font-weight: 600; color: var(--accent-end); background: rgba(201,122,1,.15); padding: 5px 12px; border-radius: 999px; }
-        .q-rare { font-size: 12px; font-weight: 600; color: #A9750A; background: rgba(201,122,1,.12); padding: 5px 13px; border-radius: 999px; }
-        .q-title { font-size: 17px; font-weight: 700; color: var(--dark); line-height: 1.2; }
-        .q-desc { font-size: 13.5px; color: var(--brown); line-height: 1.45;
+        .q-cat { font-size: 13px; font-weight: 600; color: var(--accent-end); background: rgba(201,122,1,.15); padding: 5px 12px; border-radius: 999px; }
+        .q-rare { font-size: 13px; font-weight: 500; color: #A9750A; background: rgba(201,122,1,.12); padding: 5px 14px; border-radius: 999px; }
+        .q-title { font-size: 18px; font-weight: 700; color: var(--dark); line-height: 1.2;
+            display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+        .q-desc { font-size: 15px; color: var(--brown); line-height: 1.33;
             display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
         .q-foot { margin-top: auto; display: flex; justify-content: space-between; align-items: center; }
-        .q-xp { font-size: 15px; font-weight: 700;
+        .q-xp { font-size: 16px; font-weight: 700;
             background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
             -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-        .q-exp { font-size: 12px; color: var(--brown); }
+        .q-exp { font-size: 13px; color: var(--brown); }
         .flip-hint { position: absolute; bottom: -26px; left: 0; right: 0;
             text-align: center; font-size: 12px; color: var(--muted); transition: opacity .3s; }
         .flip.flipped .flip-hint { opacity: 0; }
@@ -251,11 +255,17 @@
 
         footer {
             text-align: center; padding: 28px 24px 36px;
-            background: #d9c08e; color: var(--dark); font-size: 13.5px;
-            border-top: 1.5px solid #bfa46f;
+            background: #d8c193; color: var(--dark);
+            border-top: 1.5px solid #bea77a;
         }
-        footer a { color: var(--accent-end); font-weight: 700; text-decoration: underline; text-underline-offset: 3px; margin: 0 8px; }
-        footer a:hover { color: var(--accent-start); }
+        .foot-links { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; font-size: 14px; }
+        .foot-links a {
+            color: var(--accent-end); font-weight: 700; text-decoration: none;
+            padding: 2px 15px; transition: color .15s ease;
+        }
+        .foot-links a + a { border-left: 1px solid rgb(155, 127, 89); }
+        .foot-links a:hover { color: var(--accent-start); text-decoration: underline; text-underline-offset: 3px; }
+        .foot-copy { margin-top: 15px; font-size: 12.5px; color: rgba(35,20,3,.5); }
     </style>
 </head>
 <body>
@@ -269,7 +279,7 @@
                 <span class="ring"></span><span class="ring"></span><span class="ring"></span>
                 <i class="spk a">✦</i><i class="spk b">✦</i><i class="spk c">✦</i><i class="spk d">✦</i>
             </div>
-            <div class="flip" onclick="this.classList.add('flipped')">
+            <div class="flip" onclick="revealCard(this)">
                 <div class="flip-inner">
                     <div class="card back">
                         <div class="rings"><span></span><span></span><span></span></div>
@@ -289,15 +299,17 @@
                     </div>
                     <div class="card front">
                         <div class="fsheen"></div>
-                        <div class="q-row">
-                            <span class="q-cat">Adventure</span>
-                            <span class="q-rare">Legendary</span>
-                        </div>
-                        <div class="q-title">Catch the sunset somewhere new</div>
-                        <div class="q-desc">Find the highest spot you can reach today and watch the sun go down — bring someone along, or savor it solo.</div>
-                        <div class="q-foot">
-                            <span class="q-xp">+250 XP</span>
-                            <span class="q-exp">Expires in 24h&nbsp;›</span>
+                        <div class="q-content">
+                            <div class="q-row">
+                                <span class="q-cat">Discovery</span>
+                                <span class="q-rare">Legendary</span>
+                            </div>
+                            <div class="q-title">The Improvised Tour Guides</div>
+                            <div class="q-desc">Get together with your friends and go to a museum, art gallery, historical landmark, or tourist trap in your city that none of you know anything about. Take turns acting as the official "tour guide" for the rest of the group. You must completely make up fake, absurd - but highly confident - historical facts and backstories for the exhibits you are looking at. Keep a straight face the entire time. Don't forget the group pic in the end!</div>
+                            <div class="q-foot">
+                                <span class="q-xp">+250 XP</span>
+                                <span class="q-exp">Expires in 24h&nbsp;›</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -307,9 +319,7 @@
         <h1>Turn everyday life into an <span class="g">adventure</span>.</h1>
         <p class="sub">One bold real-world quest a day. Get off your phone and into the moment.</p>
 
-        <!-- TODO: replace YOUR_APP_ID with your numeric Apple ID
-             (App Store Connect → App Information → "Apple ID"). -->
-        <a class="appstore" href="https://apps.apple.com/app/idYOUR_APP_ID">
+        <a class="appstore" href="https://apps.apple.com/app/id6761846805">
             <svg viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>
             <span class="t"><small>Download on the</small><b>App Store</b></span>
         </a>
@@ -317,10 +327,62 @@
     </main>
 
     <footer>
-        <a href="mailto:hello@errantapp.com">Contact us</a>
-        &nbsp;·&nbsp; <a href="/support">Support</a>
-        &nbsp;·&nbsp; <a href="/terms">Terms</a>
-        &nbsp;·&nbsp; <a href="/privacy">Privacy</a>
+        <nav class="foot-links">
+            <a href="mailto:hello@errantapp.com">Contact us</a>
+            <a href="/support">Support</a>
+            <a href="/terms">Terms</a>
+            <a href="/privacy">Privacy</a>
+        </nav>
+        <div class="foot-copy">© 2026 Errant</div>
     </footer>
+
+    <script>
+    (function () {
+        var quests = [
+            {
+                cat: "Discovery",
+                title: "The Improvised Tour Guides",
+                desc: "Get together with your friends and go to a museum, art gallery, historical landmark, or tourist trap in your city that none of you know anything about. Take turns acting as the official \"tour guide\" for the rest of the group. You must completely make up fake, absurd - but highly confident - historical facts and backstories for the exhibits you are looking at. Keep a straight face the entire time. Don't forget the group pic in the end!"
+            },
+            {
+                cat: "Social",
+                title: "Grand Convergence",
+                desc: "It is time to bring everyone together for a massive, unforgettable weekend event. Your quest is to plan and host a large-scale dinner party, potluck, or bonfire, explicitly inviting friends from completely different circles of your life. Mix your work friends, your childhood friends, and your hobby groups all in one place. As the host, you must curate an amazing playlist, prepare or organize a diverse menu of food, and set up interactive games or activities to ensure these different groups actually bond."
+            },
+            {
+                cat: "Creativity",
+                title: "Thrift Store Disguise",
+                desc: "Get together with your friends and go to a thrift store with a strict $10 limit. Whoever creates the worst possible outfit wins. Scour the racks for the most clashing patterns and bizarre fits to assemble a look that truly tests the limits of fashion. Dont forget to take a photo in the end!"
+            },
+            {
+                cat: "Adventure",
+                title: "The \"Saved Folder\" Expedition",
+                desc: "We all have that graveyard of \"Saved\" reels featuring places we say we'll visit \"eventually.\" Today is eventually. Dig into your saved folder and find a local hike, a restaurant, or an activity. Grab a friend, clear your schedule, and spend the day making that saved reel a reality. Take a photo to prove you finally went!"
+            }
+        ];
+        var i = 0;
+        window.revealCard = function (el) {
+            if (el.classList.contains('flipped')) return;
+            el.classList.add('flipped');
+            var content = el.querySelector('.q-content');
+            var cat = el.querySelector('.q-cat');
+            var title = el.querySelector('.q-title');
+            var desc = el.querySelector('.q-desc');
+            if (!content) return;
+            setTimeout(function () {
+                setInterval(function () {
+                    content.classList.add('fade');
+                    setTimeout(function () {
+                        i = (i + 1) % quests.length;
+                        cat.textContent = quests[i].cat;
+                        title.textContent = quests[i].title;
+                        desc.textContent = quests[i].desc;
+                        content.classList.remove('fade');
+                    }, 320);
+                }, 3400);
+            }, 1500);
+        };
+    })();
+    </script>
 </body>
 </html>
